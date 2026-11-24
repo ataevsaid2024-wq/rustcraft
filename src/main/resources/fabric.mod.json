@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "rustcraft",
+  "version": "${version}",
+  "name": "Rust in Minecraft",
+  "description": "Rust-режим для Майнкрафта: голод, жажда, HUD и переключатель /mode.",
+  "authors": ["You"],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["net.rustcraft.RustCraft"],
+    "client": ["net.rustcraft.client.RustCraftClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.18.0",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
