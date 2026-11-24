@@ -7,6 +7,7 @@ public class PlayerStats {
     public boolean rust = false;
     public int water = MAX_WATER;
     public int food = MAX_FOOD;
+    public int piece = 0;
 
     public void refill() {
         water = MAX_WATER;

@@ -1,4 +1,5 @@
 {
   "key.rustcraft.toggle": "Переключить режим Rust/Minecraft",
-  "key.category.rustcraft.main": "Rust in Minecraft"
+  "key.category.rustcraft.main": "Rust in Minecraft",
+  "key.rustcraft.build": "Меню строительства (зажать)"
 }
