@@ -1,5 +1,9 @@
 {
   "key.rustcraft.toggle": "Toggle Rust/Minecraft mode",
   "key.category.rustcraft.main": "Rust in Minecraft",
-  "key.rustcraft.build": "Build menu (hold)"
+  "key.rustcraft.build": "Build menu (hold)",
+  "item.rustcraft.rock": "Rock",
+  "item.rustcraft.wood": "Wood",
+  "item.rustcraft.stone": "Stones",
+  "block.rustcraft.stone_node": "Stone Node"
 }

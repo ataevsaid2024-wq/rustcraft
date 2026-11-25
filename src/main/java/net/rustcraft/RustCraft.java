@@ -5,6 +5,9 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.minecraft.item.ItemGroups;
+import net.minecraft.item.ItemStack;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -44,6 +47,23 @@ public class RustCraft implements ModInitializer {
         PayloadTypeRegistry.playS2C().register(StatsPayload.ID, StatsPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(TogglePayload.ID, TogglePayload.CODEC);
         PayloadTypeRegistry.playC2S().register(ActionPayload.ID, ActionPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(HitPayload.ID, HitPayload.CODEC);
+
+        ModItems.init();
+        ModBlocks.init();
+        ItemGroupEvents.modifyEntriesEvent(ItemGroups.INGREDIENTS).register(entries -> {
+            entries.add(ModItems.ROCK);
+            entries.add(ModItems.WOOD);
+            entries.add(ModItems.STONE);
+            entries.add(ModBlocks.STONE_NODE);
+        });
+
+        // Удар по дереву / глыбе
+        ServerPlayNetworking.registerGlobalReceiver(HitPayload.ID, (payload, context) -> {
+            ServerPlayerEntity p = context.player();
+            if (!stats(p).rust) return;
+            Gathering.hit(p, payload.pos());
+        });
 
         // Инвентарь в стиле Rust
         RustInventoryHandler.TYPE = Registry.register(Registries.SCREEN_HANDLER,
@@ -125,7 +145,10 @@ public class RustCraft implements ModInitializer {
         PlayerStats s = stats(p);
         s.rust = rust;
         s.piece = 0;
-        if (rust) s.refill();
+        if (rust) {
+            s.refill();
+            if (p.getInventory().count(ModItems.ROCK) == 0) p.giveItemStack(new ItemStack(ModItems.ROCK));
+        }
         sync(p);
         p.sendMessage(Text.literal(rust ? "Режим: RUST" : "Режим: MINECRAFT"), true);
     }

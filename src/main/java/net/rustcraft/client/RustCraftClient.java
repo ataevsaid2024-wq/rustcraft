@@ -12,7 +12,12 @@ import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
+import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
+import net.rustcraft.HitPayload;
+import net.rustcraft.ModBlocks;
 import net.rustcraft.ActionPayload;
 import net.rustcraft.PlayerStats;
 import net.rustcraft.RustInventoryHandler;
@@ -24,6 +29,7 @@ import org.lwjgl.glfw.GLFW;
 public class RustCraftClient implements ClientModInitializer {
     public static KeyBinding toggleKey;
     public static KeyBinding buildKey;
+    private static long lastHit = 0;
 
     private static final int GREEN = 0xFF86AE33;
     private static final int BLUE = 0xFF459CCB;
@@ -62,6 +68,21 @@ public class RustCraftClient implements ClientModInitializer {
                 client.setScreen(null);
                 ClientPlayNetworking.send(new ActionPayload(1, 0));
             }
+        });
+
+        // Удар по дереву или глыбе: вместо ванильной ломки шлём удар на сервер
+        AttackBlockCallback.EVENT.register((player, world, hand, pos, direction) -> {
+            if (!world.isClient() || !RustState.rust) return ActionResult.PASS;
+            var state = world.getBlockState(pos);
+            if (state.isIn(BlockTags.LOGS) || state.isOf(ModBlocks.STONE_NODE)) {
+                long now = System.currentTimeMillis();
+                if (now - lastHit >= 450) {
+                    lastHit = now;
+                    ClientPlayNetworking.send(new HitPayload(pos));
+                }
+                return ActionResult.SUCCESS;
+            }
+            return ActionResult.PASS;
         });
 
         // Прячем ванильные сердечки, броню, голод и опыт в режиме Rust

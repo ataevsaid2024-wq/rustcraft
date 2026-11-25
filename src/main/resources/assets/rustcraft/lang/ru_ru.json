@@ -1,5 +1,9 @@
 {
   "key.rustcraft.toggle": "Переключить режим Rust/Minecraft",
   "key.category.rustcraft.main": "Rust in Minecraft",
-  "key.rustcraft.build": "Меню строительства (зажать)"
+  "key.rustcraft.build": "Меню строительства (зажать)",
+  "item.rustcraft.rock": "Камень",
+  "item.rustcraft.wood": "Дерево",
+  "item.rustcraft.stone": "Камни",
+  "block.rustcraft.stone_node": "Каменная глыба"
 }
