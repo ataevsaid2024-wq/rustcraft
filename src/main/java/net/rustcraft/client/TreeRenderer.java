@@ -36,9 +36,20 @@ public class TreeRenderer implements BlockEntityRenderer<TreeBlockEntity, TreeRe
         public int crossY;
         public int faceX;   // -1, 0, 1
         public int faceZ;   // -1, 0, 1
+        public float crossOffset = 0.2f;
     }
 
     public TreeRenderer(BlockEntityRendererFactory.Context context) {
+    }
+
+    @Override
+    public boolean rendersOutsideBoundingBox() {
+        return true; // крона шире блока, иначе дерево пропадает у края экрана
+    }
+
+    @Override
+    public int getRenderDistance() {
+        return 48;
     }
 
     @Override
@@ -74,6 +85,7 @@ public class TreeRenderer implements BlockEntityRenderer<TreeBlockEntity, TreeRe
                     state.faceX = 0;
                     state.faceZ = dz > 0 ? 1 : -1;
                 }
+                state.crossOffset = TreeMesh.trunkSurface(NAMES[state.variant], state.crossY + 0.5f, state.faceX, state.faceZ) + 0.01f;
                 state.showCross = true;
             }
         }
@@ -110,10 +122,11 @@ public class TreeRenderer implements BlockEntityRenderer<TreeBlockEntity, TreeRe
             final int fx = state.faceX;
             final int fz = state.faceZ;
             final float cy = state.crossY + 0.5f;
+            final float off = state.crossOffset;
             matrices.push();
             matrices.translate(0.5, 0.0, 0.5);
             queue.submitCustom(matrices, RenderLayers.entityCutoutNoCull(CROSS), (entry, vc) -> {
-                float o = 0.24f, h = 0.22f;
+                float o = off, h = 0.18f;
                 float[][] c = new float[4][3];
                 float[][] uv = {{0, 1}, {1, 1}, {1, 0}, {0, 0}};
                 for (int i = 0; i < 4; i++) {

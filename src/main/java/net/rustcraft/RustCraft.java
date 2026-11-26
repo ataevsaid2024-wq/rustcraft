@@ -110,6 +110,20 @@ public class RustCraft implements ModInitializer {
             return ActionResult.SUCCESS;
         });
 
+        // /trees on|off включает и выключает замену ванильных деревьев на 3D-модели
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
+                dispatcher.register(CommandManager.literal("trees")
+                        .then(CommandManager.literal("on").executes(ctx -> {
+                            TreeConverter.enabled = true;
+                            ctx.getSource().sendFeedback(() -> Text.literal("Замена деревьев: ВКЛ"), false);
+                            return 1;
+                        }))
+                        .then(CommandManager.literal("off").executes(ctx -> {
+                            TreeConverter.enabled = false;
+                            ctx.getSource().sendFeedback(() -> Text.literal("Замена деревьев: ВЫКЛ"), false);
+                            return 1;
+                        }))));
+
         // /tree [0-3] ставит 3D-дерево перед вами (0 акация, 1-3 деревья)
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
                 dispatcher.register(CommandManager.literal("tree")
@@ -134,6 +148,7 @@ public class RustCraft implements ModInitializer {
 
         // Тик: жажда -1 раз в секунду, еда -1 раз в 2 секунды (только в режиме Rust)
         ServerTickEvents.END_SERVER_TICK.register(server -> {
+            TreeConverter.tick(server);
             int t = server.getTicks();
             if (t % 20 != 0) return;
             for (ServerPlayerEntity p : server.getPlayerManager().getPlayerList()) {

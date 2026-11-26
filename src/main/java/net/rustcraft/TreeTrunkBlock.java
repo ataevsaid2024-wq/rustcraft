@@ -11,7 +11,7 @@ import net.minecraft.world.BlockView;
 
 /** Невидимый узкий блок-ствол: по нему бьют и о него упираются. */
 public class TreeTrunkBlock extends Block {
-    private static final VoxelShape SHAPE = VoxelShapes.cuboid(0.3, 0.0, 0.3, 0.7, 1.0, 0.7);
+    private static final VoxelShape SHAPE = VoxelShapes.cuboid(0.27, 0.0, 0.27, 0.73, 1.0, 0.73);
 
     public TreeTrunkBlock(AbstractBlock.Settings settings) {
         super(settings);
