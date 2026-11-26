@@ -147,8 +147,8 @@ public class RustCraftClient implements ClientModInitializer {
         double tz = f.getOffsetX() != 0 ? 1 : 0;
         for (int i = -2; i <= 2; i++) {
             double d = i * 0.1;
-            client.world.addParticle(ParticleTypes.FLAME, cx + tx * d, cy + d, cz + tz * d, 0, 0, 0);
-            client.world.addParticle(ParticleTypes.FLAME, cx + tx * d, cy - d, cz + tz * d, 0, 0, 0);
+            client.world.addParticleClient(ParticleTypes.FLAME, cx + tx * d, cy + d, cz + tz * d, 0, 0, 0);
+            client.world.addParticleClient(ParticleTypes.FLAME, cx + tx * d, cy - d, cz + tz * d, 0, 0, 0);
         }
     }
 
