@@ -1,6 +1,10 @@
 package net.rustcraft;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.Heightmap;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -45,12 +49,14 @@ public class RustCraft implements ModInitializer {
     @Override
     public void onInitialize() {
         PayloadTypeRegistry.playS2C().register(StatsPayload.ID, StatsPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(MarkerPayload.ID, MarkerPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(TogglePayload.ID, TogglePayload.CODEC);
         PayloadTypeRegistry.playC2S().register(ActionPayload.ID, ActionPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(HitPayload.ID, HitPayload.CODEC);
 
         ModItems.init();
         ModBlocks.init();
+        ModBlockEntities.init();
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.INGREDIENTS).register(entries -> {
             entries.add(ModItems.ROCK);
             entries.add(ModItems.WOOD);
@@ -104,6 +110,13 @@ public class RustCraft implements ModInitializer {
             return ActionResult.SUCCESS;
         });
 
+        // /tree [0-3] ставит 3D-дерево перед вами (0 акация, 1-3 деревья)
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
+                dispatcher.register(CommandManager.literal("tree")
+                        .executes(ctx -> spawnTree(ctx, -1))
+                        .then(CommandManager.argument("type", IntegerArgumentType.integer(0, 3))
+                                .executes(ctx -> spawnTree(ctx, IntegerArgumentType.getInteger(ctx, "type"))))));
+
         // Команды: /mode rust, /mode minecraft, /mode refill
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
                 dispatcher.register(CommandManager.literal("mode")
@@ -134,6 +147,18 @@ public class RustCraft implements ModInitializer {
                 sync(p);
             }
         });
+    }
+
+    private static int spawnTree(CommandContext<ServerCommandSource> ctx, int type) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        ServerPlayerEntity p = ctx.getSource().getPlayerOrThrow();
+        ServerWorld w = (ServerWorld) p.getEntityWorld();
+        Direction f = p.getHorizontalFacing();
+        int x = p.getBlockX() + f.getOffsetX() * 6;
+        int z = p.getBlockZ() + f.getOffsetZ() * 6;
+        int y = w.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, x, z);
+        int variant = type >= 0 ? type : w.getRandom().nextInt(4);
+        Trees.place(w, new BlockPos(x, y, z), variant);
+        return 1;
     }
 
     private static int setMode(CommandContext<ServerCommandSource> ctx, boolean rust) throws com.mojang.brigadier.exceptions.CommandSyntaxException {

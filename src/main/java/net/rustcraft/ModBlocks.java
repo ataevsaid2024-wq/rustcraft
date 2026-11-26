@@ -13,6 +13,12 @@ import net.minecraft.util.Identifier;
 
 public class ModBlocks {
     public static Block STONE_NODE;
+    public static Block TREE_TRUNK;
+    public static Block TREE_BASE;
+
+    private static AbstractBlock.Settings treeSettings(RegistryKey<Block> key) {
+        return AbstractBlock.Settings.create().registryKey(key).strength(50.0f).nonOpaque().dropsNothing().sounds(BlockSoundGroup.WOOD);
+    }
 
     public static void init() {
         Identifier id = Identifier.of(RustCraft.MOD_ID, "stone_node");
@@ -27,5 +33,11 @@ public class ModBlocks {
         RegistryKey<Item> itemKey = RegistryKey.of(RegistryKeys.ITEM, id);
         Registry.register(Registries.ITEM, itemKey,
                 new BlockItem(STONE_NODE, new Item.Settings().registryKey(itemKey).useBlockPrefixedTranslationKey()));
+
+        // Невидимые блоки 3D-дерева (модель рисует рендерер)
+        RegistryKey<Block> trunkKey = RegistryKey.of(RegistryKeys.BLOCK, Identifier.of(RustCraft.MOD_ID, "tree_trunk"));
+        TREE_TRUNK = Registry.register(Registries.BLOCK, trunkKey, new TreeTrunkBlock(treeSettings(trunkKey)));
+        RegistryKey<Block> baseKey = RegistryKey.of(RegistryKeys.BLOCK, Identifier.of(RustCraft.MOD_ID, "tree_base"));
+        TREE_BASE = Registry.register(Registries.BLOCK, baseKey, new TreeBaseBlock(treeSettings(baseKey)));
     }
 }

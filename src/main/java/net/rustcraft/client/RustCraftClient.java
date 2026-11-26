@@ -16,11 +16,24 @@ import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.rustcraft.Marker;
+import net.rustcraft.MarkerPayload;
 import net.rustcraft.HitPayload;
+import java.util.HashMap;
+import java.util.Map;
 import net.rustcraft.ModBlocks;
+import net.rustcraft.ModBlockEntities;
+import net.rustcraft.Trees;
+import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
 import net.rustcraft.ActionPayload;
 import net.rustcraft.PlayerStats;
 import net.rustcraft.RustInventoryHandler;
+import net.rustcraft.RustLayout;
 import net.rustcraft.RustState;
 import net.rustcraft.StatsPayload;
 import net.rustcraft.TogglePayload;
@@ -30,6 +43,7 @@ public class RustCraftClient implements ClientModInitializer {
     public static KeyBinding toggleKey;
     public static KeyBinding buildKey;
     private static long lastHit = 0;
+    public static final Map<BlockPos, Integer> COUNTS = new HashMap<>();
 
     private static final int GREEN = 0xFF86AE33;
     private static final int BLUE = 0xFF459CCB;
@@ -44,6 +58,7 @@ public class RustCraftClient implements ClientModInitializer {
         buildKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.rustcraft.build", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_C, category));
 
+        BlockEntityRendererFactories.register(ModBlockEntities.TREE, TreeRenderer::new);
         HandledScreens.register(RustInventoryHandler.TYPE, RustInventoryScreen::new);
 
         ClientPlayNetworking.registerGlobalReceiver(StatsPayload.ID, (payload, context) ->
@@ -54,7 +69,17 @@ public class RustCraftClient implements ClientModInitializer {
                     if (!payload.rust()) RustState.piece = 0;
                 }));
 
+        ClientPlayNetworking.registerGlobalReceiver(MarkerPayload.ID, (payload, context) ->
+                context.client().execute(() -> {
+                    if (payload.count() < 0) COUNTS.remove(payload.base());
+                    else COUNTS.put(payload.base(), payload.count());
+                }));
+
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (client.getWindow() != null) {
+                RustLayout.compute(client.getWindow().getScaledWidth(), client.getWindow().getScaledHeight());
+            }
+            drawCross(client);
             while (toggleKey.wasPressed()) {
                 if (client.player != null) ClientPlayNetworking.send(new TogglePayload());
             }
@@ -74,12 +99,11 @@ public class RustCraftClient implements ClientModInitializer {
         AttackBlockCallback.EVENT.register((player, world, hand, pos, direction) -> {
             if (!world.isClient() || !RustState.rust) return ActionResult.PASS;
             var state = world.getBlockState(pos);
-            if (state.isIn(BlockTags.LOGS) || state.isOf(ModBlocks.STONE_NODE)) {
+            if (Trees.isTree(state) || state.isOf(ModBlocks.STONE_NODE)) {
                 long now = System.currentTimeMillis();
-                if (now - lastHit >= 450) {
-                    lastHit = now;
-                    ClientPlayNetworking.send(new HitPayload(pos));
-                }
+                if (now - lastHit < 450) return ActionResult.FAIL;
+                lastHit = now;
+                ClientPlayNetworking.send(new HitPayload(pos));
                 return ActionResult.SUCCESS;
             }
             return ActionResult.PASS;
@@ -103,6 +127,29 @@ public class RustCraftClient implements ClientModInitializer {
             bar(ctx, mc, x, y - 15, barW, barH, RustState.water / (float) PlayerStats.MAX_WATER, BLUE, String.valueOf(RustState.water));
             bar(ctx, mc, x, y - 30, barW, barH, hp / 100f, GREEN, String.valueOf(hp));
         });
+    }
+
+    /** Рисует жёлтый крест на стволе, на который смотрит игрок. */
+    private static void drawCross(MinecraftClient client) {
+        if (!RustState.rust || client.world == null || client.player == null) return;
+        if (client.player.age % 4 != 0) return;
+        if (!(client.crosshairTarget instanceof BlockHitResult hit) || hit.getType() != HitResult.Type.BLOCK) return;
+        BlockPos p = hit.getBlockPos();
+        if (!client.world.getBlockState(p).isIn(BlockTags.LOGS)) return;
+
+        BlockPos base = Marker.base(client.world, p);
+        BlockPos m = Marker.at(client.world, base, COUNTS.getOrDefault(base, 0));
+        Direction f = client.player.getHorizontalFacing().getOpposite();
+        double cx = m.getX() + 0.5 + f.getOffsetX() * 0.55;
+        double cy = m.getY() + 0.5;
+        double cz = m.getZ() + 0.5 + f.getOffsetZ() * 0.55;
+        double tx = f.getOffsetZ() != 0 ? 1 : 0;
+        double tz = f.getOffsetX() != 0 ? 1 : 0;
+        for (int i = -2; i <= 2; i++) {
+            double d = i * 0.1;
+            client.world.addParticle(ParticleTypes.FLAME, cx + tx * d, cy + d, cz + tz * d, 0, 0, 0);
+            client.world.addParticle(ParticleTypes.FLAME, cx + tx * d, cy - d, cz + tz * d, 0, 0, 0);
+        }
     }
 
     private static void hide(Identifier id) {

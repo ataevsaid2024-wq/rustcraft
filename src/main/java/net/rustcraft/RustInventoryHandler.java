@@ -23,28 +23,30 @@ public class RustInventoryHandler extends ScreenHandler {
         super(TYPE, syncId);
         Inventory extra = inv.player.getEnderChestInventory();
 
+        int P = RustLayout.P, O = RustLayout.O;
+
         // хотбар: 6 слотов
         for (int c = 0; c < 6; c++) {
-            this.addSlot(new Slot(inv, c, 140 + c * 18, 134));
+            this.addSlot(new Slot(inv, c, RustLayout.X1 + c * P + O, RustLayout.HOTBAR_Y + O));
         }
         // сетка 6 x 5
         for (int k = 0; k < 30; k++) {
             int invIndex = k < 27 ? 9 + k : 6 + (k - 27);
-            this.addSlot(new Slot(inv, invIndex, 140 + (k % 6) * 18, 34 + (k / 6) * 18));
+            this.addSlot(new Slot(inv, invIndex, RustLayout.X1 + (k % 6) * P + O, RustLayout.GRID_Y + (k / 6) * P + O));
         }
         // доп. рюкзак (7)
         for (int c = 0; c < 7; c++) {
-            this.addSlot(new Slot(extra, c, 4 + c * 18, 150));
+            this.addSlot(new Slot(extra, c, RustLayout.X0 + c * P + O, RustLayout.HOTBAR_Y + O));
         }
         // оружие (1)
-        this.addSlot(new Slot(extra, 7, 262, 34));
+        this.addSlot(new Slot(extra, 7, RustLayout.X2 + O, RustLayout.GRID_Y + O));
         // боеприпасы (6)
         for (int c = 0; c < 6; c++) {
-            this.addSlot(new Slot(extra, 8 + c, 262 + c * 18, 72));
+            this.addSlot(new Slot(extra, 8 + c, RustLayout.X2 + c * P + O, RustLayout.GRID_Y + 2 * P + O));
         }
         // ракеты (3)
         for (int c = 0; c < 3; c++) {
-            this.addSlot(new Slot(extra, 14 + c, 262 + c * 18, 110));
+            this.addSlot(new Slot(extra, 14 + c, RustLayout.X2 + c * P + O, RustLayout.GRID_Y + 4 * P + O));
         }
     }
 

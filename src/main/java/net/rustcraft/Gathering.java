@@ -2,6 +2,7 @@ package net.rustcraft;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.ItemTags;
@@ -38,7 +39,7 @@ public class Gathering {
         boolean axe = tool.isIn(ItemTags.AXES);
         boolean pick = tool.isIn(ItemTags.PICKAXES);
 
-        if (state.isIn(BlockTags.LOGS)) {
+        if (Trees.isTree(state)) {
             if (!rock && !axe) {
                 p.sendMessage(Text.literal("Нужен камень или топор"), true);
                 return;
@@ -53,21 +54,29 @@ public class Gathering {
         }
     }
 
+    private static final Map<BlockPos, Integer> COUNT = new HashMap<>();
+
     private static void chop(ServerPlayerEntity p, ServerWorld world, BlockPos hit, boolean axe) {
-        BlockPos base = hit;
-        while (world.getBlockState(base.down()).isIn(BlockTags.LOGS)) base = base.down();
-        BlockPos key = base.toImmutable();
+        BlockPos key = Marker.base(world, hit);
+        int count = COUNT.getOrDefault(key, 0);
+        BlockPos marker = Marker.at(world, key, count);
+        boolean bonus = hit.equals(marker);
 
         int health = HEALTH.getOrDefault(key, 100) - (axe ? 25 : 10);
-        int amount = axe ? 15 : 6;
+        int amount = axe ? 10 : 4;
+        if (bonus) amount *= 2;
         p.giveItemStack(new ItemStack(ModItems.WOOD, amount));
-        p.sendMessage(Text.literal("+" + amount + " дерева"), true);
+        p.sendMessage(Text.literal("+" + amount + " дерева" + (bonus ? " (в крест!)" : "")), true);
 
         if (health <= 0) {
             HEALTH.remove(key);
-            fell(world, key);
+            COUNT.remove(key);
+            ServerPlayNetworking.send(p, new MarkerPayload(key, -1));
+            felling(world, key);
         } else {
             HEALTH.put(key, health);
+            COUNT.put(key, count + 1);
+            ServerPlayNetworking.send(p, new MarkerPayload(key, count + 1));
         }
     }
 
@@ -83,6 +92,18 @@ public class Gathering {
             world.setBlockState(pos, Blocks.AIR.getDefaultState());
         } else {
             HEALTH.put(key, health);
+        }
+    }
+
+    private static void felling(ServerWorld world, BlockPos base) {
+        if (Trees.isMeshTree(world.getBlockState(base))) {
+            BlockPos q = base;
+            while (Trees.isMeshTree(world.getBlockState(q))) {
+                world.setBlockState(q, Blocks.AIR.getDefaultState());
+                q = q.up();
+            }
+        } else {
+            fell(world, base);
         }
     }
 

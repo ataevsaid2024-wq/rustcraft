@@ -6,43 +6,56 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import net.rustcraft.RustInventoryHandler;
+import net.rustcraft.RustLayout;
 
 public class RustInventoryScreen extends HandledScreen<RustInventoryHandler> {
     public RustInventoryScreen(RustInventoryHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
-        this.backgroundWidth = 380;
-        this.backgroundHeight = 180;
         this.titleY = -200;
         this.playerInventoryTitleY = -200;
     }
 
+    @Override
+    protected void init() {
+        // окно инвентаря занимает весь экран, слоты лежат в экранных координатах
+        this.backgroundWidth = this.width;
+        this.backgroundHeight = this.height;
+        super.init();
+    }
+
     private void label(DrawContext ctx, String text, int x, int y) {
-        ctx.drawText(this.textRenderer, text, this.x + x, this.y + y, 0xFFE8E4D8, true);
+        ctx.drawText(this.textRenderer, text, x, y, 0xFFF2EEE0, true);
     }
 
     @Override
     protected void drawBackground(DrawContext ctx, float delta, int mouseX, int mouseY) {
-        ctx.fill(0, 0, this.width, this.height, 0x88000000);
+        // лёгкое затемнение вместо чёрного фона
+        ctx.fill(0, 0, this.width, this.height, 0x22000000);
 
+        int P = RustLayout.P;
+        int gy = RustLayout.GRID_Y;
         String name = (this.client != null && this.client.player != null)
                 ? this.client.player.getName().getString() : "";
-        label(ctx, "Rust in Minecraft", 4, 0);
-        label(ctx, name, 4, 12);
 
-        label(ctx, "Взрыв 0%", 4, 60);
-        label(ctx, "Холод 0%", 4, 74);
-        label(ctx, "Радиация 0%", 4, 88);
-        label(ctx, "Укусы 0%", 4, 102);
-        label(ctx, "РЮКЗАК", 4, 138);
+        label(ctx, "Rust in Minecraft", RustLayout.X0, 8);
+        label(ctx, name, RustLayout.X0, 20);
 
-        label(ctx, "ИНВЕНТАРЬ", 140, 22);
-        label(ctx, "ВООРУЖЕНИЕ", 262, 8);
-        label(ctx, "ОРУЖИЕ", 284, 39);
-        label(ctx, "БОЕПРИПАСЫ ДЛЯ ОРУЖИЯ", 262, 60);
-        label(ctx, "РАКЕТЫ", 262, 98);
+        for (int i = 0; i < 4; i++) {
+            String[] t = {"Взрыв 0%", "Холод 0%", "Радиация 0%", "Укусы 0%"};
+            label(ctx, t[i], RustLayout.X0, gy + i * 14);
+        }
+        label(ctx, "РЮКЗАК", RustLayout.X0, RustLayout.HOTBAR_Y - 12);
+
+        label(ctx, "ИНВЕНТАРЬ", RustLayout.X1, gy - 12);
+        label(ctx, "ВООРУЖЕНИЕ", RustLayout.X2, gy - 12);
+        label(ctx, "ОРУЖИЕ", RustLayout.X2 + P + 6, gy + P / 2 - 4);
+        label(ctx, "БОЕПРИПАСЫ ДЛЯ ОРУЖИЯ", RustLayout.X2, gy + 2 * P - 12);
+        label(ctx, "РАКЕТЫ", RustLayout.X2, gy + 4 * P - 12);
 
         for (Slot s : this.handler.slots) {
-            ctx.fill(this.x + s.x - 1, this.y + s.y - 1, this.x + s.x + 17, this.y + s.y + 17, 0x55FFFFFF);
+            int bx = s.x - RustLayout.O;
+            int by = s.y - RustLayout.O;
+            ctx.fill(bx, by, bx + P - 2, by + P - 2, 0x55A0A89C);
         }
     }
 

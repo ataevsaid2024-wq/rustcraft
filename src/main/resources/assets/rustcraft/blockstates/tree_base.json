@@ -1,0 +1,16 @@
+{
+ "variants": {
+  "variant=0": {
+   "model": "rustcraft:block/tree_empty"
+  },
+  "variant=1": {
+   "model": "rustcraft:block/tree_empty"
+  },
+  "variant=2": {
+   "model": "rustcraft:block/tree_empty"
+  },
+  "variant=3": {
+   "model": "rustcraft:block/tree_empty"
+  }
+ }
+}

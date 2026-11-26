@@ -3,7 +3,8 @@
  "textures": {
   "rock": "rustcraft:item/rock_tex",
   "skin": "rustcraft:item/skin",
-  "particle": "rustcraft:item/rock_tex"
+  "particle": "rustcraft:item/rock_tex",
+  "sleeve": "rustcraft:item/sleeve"
  },
  "elements": [
   {
@@ -259,6 +260,166 @@
     },
     "down": {
      "texture": "#skin"
+    }
+   }
+  },
+  {
+   "from": [
+    5,
+    -9,
+    5.5
+   ],
+   "to": [
+    10.2,
+    1.5,
+    10.5
+   ],
+   "faces": {
+    "north": {
+     "texture": "#skin"
+    },
+    "south": {
+     "texture": "#skin"
+    },
+    "east": {
+     "texture": "#skin"
+    },
+    "west": {
+     "texture": "#skin"
+    },
+    "up": {
+     "texture": "#skin"
+    },
+    "down": {
+     "texture": "#skin"
+    }
+   }
+  },
+  {
+   "from": [
+    4.6,
+    -16,
+    5.1
+   ],
+   "to": [
+    10.6,
+    -6,
+    10.9
+   ],
+   "faces": {
+    "north": {
+     "texture": "#sleeve"
+    },
+    "south": {
+     "texture": "#sleeve"
+    },
+    "east": {
+     "texture": "#sleeve"
+    },
+    "west": {
+     "texture": "#sleeve"
+    },
+    "up": {
+     "texture": "#sleeve"
+    },
+    "down": {
+     "texture": "#sleeve"
+    }
+   }
+  },
+  {
+   "from": [
+    -3,
+    -2,
+    4.5
+   ],
+   "to": [
+    2,
+    2.5,
+    9.5
+   ],
+   "faces": {
+    "north": {
+     "texture": "#skin"
+    },
+    "south": {
+     "texture": "#skin"
+    },
+    "east": {
+     "texture": "#skin"
+    },
+    "west": {
+     "texture": "#skin"
+    },
+    "up": {
+     "texture": "#skin"
+    },
+    "down": {
+     "texture": "#skin"
+    }
+   }
+  },
+  {
+   "from": [
+    -3,
+    -9,
+    5
+   ],
+   "to": [
+    2,
+    -2,
+    9.5
+   ],
+   "faces": {
+    "north": {
+     "texture": "#skin"
+    },
+    "south": {
+     "texture": "#skin"
+    },
+    "east": {
+     "texture": "#skin"
+    },
+    "west": {
+     "texture": "#skin"
+    },
+    "up": {
+     "texture": "#skin"
+    },
+    "down": {
+     "texture": "#skin"
+    }
+   }
+  },
+  {
+   "from": [
+    -3.4,
+    -16,
+    4.6
+   ],
+   "to": [
+    2.4,
+    -8,
+    9.9
+   ],
+   "faces": {
+    "north": {
+     "texture": "#sleeve"
+    },
+    "south": {
+     "texture": "#sleeve"
+    },
+    "east": {
+     "texture": "#sleeve"
+    },
+    "west": {
+     "texture": "#sleeve"
+    },
+    "up": {
+     "texture": "#sleeve"
+    },
+    "down": {
+     "texture": "#sleeve"
     }
    }
   }
